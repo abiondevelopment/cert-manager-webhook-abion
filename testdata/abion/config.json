@@ -1,0 +1,6 @@
+{
+  "apiKeySecretRef": {
+    "name": "abion-credentials",
+    "key": "apiKey"
+  }
+}
