@@ -3,7 +3,7 @@ OS ?= $(shell $(GO) env GOOS)
 ARCH ?= $(shell $(GO) env GOARCH)
 
 IMAGE_NAME := "abiondevelopment/cert-manager-webhook-abion"
-IMAGE_TAG := "1.0.0"
+IMAGE_TAG := "1.1.0"
 
 OUT := $(shell pwd)/_out
 
