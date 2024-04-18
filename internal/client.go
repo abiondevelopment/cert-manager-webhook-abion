@@ -131,7 +131,7 @@ func parseError(req *http.Request, resp *http.Response) error {
 	zResp := &APIResponse[any]{}
 	err := json.Unmarshal(raw, zResp)
 	if err != nil {
-		//return errutils.NewUnexpectedStatusCodeError(req, resp.StatusCode, raw)
+		// return errutils.NewUnexpectedStatusCodeError(req, resp.StatusCode, raw)
 		return fmt.Errorf("error parsing error %w", err)
 	}
 

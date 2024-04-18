@@ -1,18 +1,16 @@
 package main
 
 import (
-	acmetest "github.com/cert-manager/cert-manager/test/acme"
 	"os"
 	"testing"
 	"time"
+
+	acmetest "github.com/cert-manager/cert-manager/test/acme"
 )
 
-var (
-	zone = os.Getenv("TEST_ZONE_NAME")
-)
+var zone = os.Getenv("TEST_ZONE_NAME")
 
 func TestRunsSuite(t *testing.T) {
-
 	solver := &abionDNSProviderSolver{}
 	fixture := acmetest.NewFixture(solver,
 		acmetest.SetResolvedZone(zone),
