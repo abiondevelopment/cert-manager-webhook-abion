@@ -80,7 +80,7 @@ should work on other hardware platforms as well but no steps have been taken to 
    helm install cert-manager-webhook-abion \
        --namespace cert-manager \
        --set features.apiPriorityAndFairness=true \
-       --set image.tag=1.0.0 \
+       --set image.tag=1.1.0 \
        --set logLevel=2 \
        ./deploy/cert-manager-webhook-abion
    ```
