@@ -74,13 +74,13 @@ should work on other hardware platforms as well but no steps have been taken to 
       ./deploy/cert-manager-webhook-abion 
    ```
 
-   To deploy using the image from Docker Hub (for example using the `1.0.0` tag):
+   To deploy using the image from Docker Hub (for example using the `1.2.0` tag):
 
    ```
    helm install cert-manager-webhook-abion \
        --namespace cert-manager \
        --set features.apiPriorityAndFairness=true \
-       --set image.tag=1.1.0 \
+       --set image.tag=1.2.0 \
        --set logLevel=2 \
        ./deploy/cert-manager-webhook-abion
    ```
