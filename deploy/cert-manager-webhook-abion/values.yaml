@@ -61,5 +61,11 @@ podAnnotations: {}
 # Extra labels for pods in deployment
 podLabels: {}
 
+# Security context for pod
+podSecurityContext: {}
+
+# Security context for container
+containerSecurityContext: {}
+
 features:
   apiPriorityAndFairness: true # Must be removed or set to `false` for Kubernetes older than 1.20.*
