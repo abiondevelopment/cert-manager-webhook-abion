@@ -1,3 +1,6 @@
+# Copyright 2025 Abion AB
+# SPDX-License-Identifier: Apache-2.0
+
 # The GroupName here is used to identify your company or business unit that
 # created this webhook.
 # For example, this may be "acme.mycompany.com".

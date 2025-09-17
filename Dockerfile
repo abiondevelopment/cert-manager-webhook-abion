@@ -1,4 +1,7 @@
-FROM golang:1.22-alpine3.19 AS build_deps
+# Copyright 2025 Abion AB
+# SPDX-License-Identifier: Apache-2.0
+
+FROM golang:1.25-alpine3.21 AS build_deps
 
 RUN apk add --no-cache git
 
@@ -15,7 +18,7 @@ COPY . .
 
 RUN CGO_ENABLED=0 go build -o webhook -ldflags '-w -extldflags "-static"' .
 
-FROM alpine:3.18
+FROM alpine:3.21
 
 RUN apk add --no-cache ca-certificates
 

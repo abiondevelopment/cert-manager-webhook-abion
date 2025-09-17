@@ -1,3 +1,7 @@
+// Copyright 2025 Abion AB
+// SPDX-License-Identifier: Apache-2.0
+
+// Package main
 package main
 
 import (
@@ -5,9 +9,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
-	"github.com/abiondevelopment/cert-manager-webhook-abion/internal"
+	"github.com/abiondevelopment/abion-go/abion"
 	"github.com/cert-manager/cert-manager/pkg/acme/webhook/apis/acme/v1alpha1"
 	"github.com/cert-manager/cert-manager/pkg/acme/webhook/cmd"
 	cmmeta "github.com/cert-manager/cert-manager/pkg/apis/meta/v1"
@@ -15,16 +20,32 @@ import (
 	extapi "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	klog "k8s.io/klog/v2"
+	"k8s.io/klog/v2"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// GroupName the Group name to use
 var GroupName = os.Getenv("GROUP_NAME")
+var AbionAPIHost = os.Getenv("ABION_API_HOST")
+var AbionAPITimeoutEnv = os.Getenv("ABION_API_TIMEOUT")
+var AbionAPITimeout int
 
 func main() {
 	if GroupName == "" {
 		panic("GROUP_NAME must be specified")
+	}
+	if AbionAPIHost == "" {
+		AbionAPIHost = "https://api.abion.com"
+	}
+	if AbionAPITimeoutEnv == "" {
+		AbionAPITimeout = 5
+	} else {
+		var err error
+		AbionAPITimeout, err = strconv.Atoi(AbionAPITimeoutEnv)
+		if err != nil {
+			panic("ABION_API_TIMEOUT not a number")
+		}
 	}
 
 	// This will register our Abion DNS provider with the webhook serving
@@ -65,7 +86,7 @@ type abionDNSProviderConfig struct {
 
 // Type holding credential.
 type credential struct {
-	ApiKey string
+	APIKey string
 }
 
 // Name is used as the name for this DNS solver when referencing it on the ACME
@@ -100,7 +121,10 @@ func (c *abionDNSProviderSolver) Present(ch *v1alpha1.ChallengeRequest) error {
 	}
 
 	// Initialize new Abion client.
-	abionClient := internal.NewAbionClient(credentials.ApiKey)
+	abionClient, err := abion.NewAbionClient(AbionAPIHost, credentials.APIKey, AbionAPITimeout)
+	if err != nil {
+		return fmt.Errorf("unable to create client: %v", err)
+	}
 
 	// Split and format domain and subdomain values.
 	domain, subdomain := c.getDomainAndSubdomain(ch)
@@ -110,7 +134,7 @@ func (c *abionDNSProviderSolver) Present(ch *v1alpha1.ChallengeRequest) error {
 		return fmt.Errorf("unable to get zone: %v", err)
 	}
 
-	var data []internal.Record
+	var data []abion.Record
 	sub, subdomainExist := zone.Data.Attributes.Records[subdomain] // subdomain, e.g. _acme-challenge
 	if subdomainExist {
 		txtRecords, txtRecordsExist := sub["TXT"]
@@ -119,19 +143,21 @@ func (c *abionDNSProviderSolver) Present(ch *v1alpha1.ChallengeRequest) error {
 		}
 	}
 
+	ttl := 60
+	comment := "acme_challenge"
 	// append the new dns-01 acme challenge record
-	data = append(data, internal.Record{
-		TTL:      60,
+	data = append(data, abion.Record{
+		TTL:      &ttl,
 		Data:     ch.Key,
-		Comments: "acme_challenge",
+		Comments: &comment,
 	})
 
-	patchRequest := internal.ZoneRequest{
-		Data: internal.Zone{
+	patchRequest := abion.ZoneRequest{
+		Data: abion.Zone{
 			Type: "zone",
 			ID:   domain,
-			Attributes: internal.Attributes{
-				Records: map[string]map[string][]internal.Record{
+			Attributes: abion.Attributes{
+				Records: map[string]map[string][]abion.Record{
 					subdomain: {"TXT": data},
 				},
 			},
@@ -170,7 +196,10 @@ func (c *abionDNSProviderSolver) CleanUp(ch *v1alpha1.ChallengeRequest) error {
 	}
 
 	// Initialize new Abion client.
-	abionClient := internal.NewAbionClient(credentials.ApiKey)
+	abionClient, err := abion.NewAbionClient(AbionAPIHost, credentials.APIKey, AbionAPITimeout)
+	if err != nil {
+		return fmt.Errorf("unable to create client: %v", err)
+	}
 
 	// Split and format domain and subdomain values.
 	domain, subdomain := c.getDomainAndSubdomain(ch)
@@ -180,7 +209,7 @@ func (c *abionDNSProviderSolver) CleanUp(ch *v1alpha1.ChallengeRequest) error {
 		return fmt.Errorf("unable to get zone: %v", err)
 	}
 
-	var data []internal.Record
+	var data []abion.Record
 	sub, subdomainExist := zone.Data.Attributes.Records[subdomain] // subdomain, e.g. _acme-challenge
 	if subdomainExist {
 		txtRecords, txtRecordsExist := sub["TXT"]
@@ -193,19 +222,19 @@ func (c *abionDNSProviderSolver) CleanUp(ch *v1alpha1.ChallengeRequest) error {
 		}
 	}
 
-	payload := map[string][]internal.Record{}
+	payload := map[string][]abion.Record{}
 	if len(data) == 0 {
 		payload["TXT"] = nil
 	} else {
 		payload["TXT"] = data
 	}
 
-	patchRequest := internal.ZoneRequest{
-		Data: internal.Zone{
+	patchRequest := abion.ZoneRequest{
+		Data: abion.Zone{
 			Type: "zone",
 			ID:   domain,
-			Attributes: internal.Attributes{
-				Records: map[string]map[string][]internal.Record{
+			Attributes: abion.Attributes{
+				Records: map[string]map[string][]abion.Record{
 					subdomain: payload,
 				},
 			},
@@ -229,7 +258,7 @@ func (c *abionDNSProviderSolver) CleanUp(ch *v1alpha1.ChallengeRequest) error {
 // provider accounts.
 // The stopCh can be used to handle early termination of the webhook, in cases
 // where a SIGTERM or similar signal is sent to the webhook process.
-func (c *abionDNSProviderSolver) Initialize(kubeClientConfig *rest.Config, stopCh <-chan struct{}) error {
+func (c *abionDNSProviderSolver) Initialize(kubeClientConfig *rest.Config, _ <-chan struct{}) error {
 	cl, err := kubernetes.NewForConfig(kubeClientConfig)
 	if err != nil {
 		return err
@@ -278,7 +307,7 @@ func (c *abionDNSProviderSolver) getCredentials(cfg *abionDNSProviderConfig, nam
 		return nil, fmt.Errorf("failed to load secret %q: %s", namespace+"/"+cfg.APIKeySecretRef.Name, err.Error())
 	}
 	if apiKey, ok := apiKeySecret.Data[cfg.APIKeySecretRef.Key]; ok {
-		credentials.ApiKey = string(apiKey)
+		credentials.APIKey = string(apiKey)
 	} else {
 		return nil, fmt.Errorf("error fetching key from secrets")
 	}

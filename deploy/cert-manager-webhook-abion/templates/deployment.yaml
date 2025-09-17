@@ -1,3 +1,6 @@
+# Copyright 2025 Abion AB
+# SPDX-License-Identifier: Apache-2.0
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -49,6 +52,14 @@ spec:
           env:
             - name: GROUP_NAME
               value: {{ .Values.groupName | quote }}
+          {{- if .Values.abionApiHost }}
+            - name: ABION_API_HOST
+              value: {{ .Values.abionApiHost | quote }}
+          {{- end }}
+          {{- if .Values.abionApiTimeout }}
+            - name: ABION_API_TIMEOUT
+              value: {{ .Values.abionApiTimeout | quote }}
+          {{- end }}
           ports:
             - name: https
               containerPort: {{ .Values.port }}

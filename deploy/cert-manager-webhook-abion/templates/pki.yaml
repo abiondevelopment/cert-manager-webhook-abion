@@ -1,3 +1,6 @@
+# Copyright 2025 Abion AB
+# SPDX-License-Identifier: Apache-2.0
+
 ---
 # Create a selfsigned Issuer, in order to create a root CA certificate for
 # signing webhook serving certificates

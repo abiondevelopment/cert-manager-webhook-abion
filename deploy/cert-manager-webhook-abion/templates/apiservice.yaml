@@ -1,3 +1,6 @@
+# Copyright 2025 Abion AB
+# SPDX-License-Identifier: Apache-2.0
+
 apiVersion: apiregistration.k8s.io/v1
 kind: APIService
 metadata:
