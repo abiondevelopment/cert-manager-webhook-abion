@@ -8,6 +8,13 @@ metadata:
     chart: {{ include "cert-manager-webhook-abion.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+    {{- with .Values.additionalLabels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.additionalAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -19,8 +26,17 @@ spec:
       labels:
         app: {{ include "cert-manager-webhook-abion.name" . }}
         release: {{ .Release.Name }}
+      {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
       serviceAccountName: {{ include "cert-manager-webhook-abion.fullname" . }}
+      securityContext:
+{{ toYaml .Values.podSecurityContext  | indent 8 }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -51,6 +67,8 @@ spec:
             - name: certs
               mountPath: /tls
               readOnly: true
+          securityContext:
+{{ toYaml .Values.containerSecurityContext | indent 12 }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
       volumes:

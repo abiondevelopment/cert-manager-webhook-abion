@@ -37,8 +37,35 @@ resources: {}
   #  cpu: 100m
   #  memory: 128Mi
 
+# Replica count for deployment
+replicaCount: 1
+
+# Log level for deployment
+logLevel: info
+
 nodeSelector: {}
 
 tolerations: []
 
 affinity: {}
+
+# Extra labels for all resources
+additionalLabels: {}
+
+# Extra annotations for all resources
+additionalAnnotations: {}
+
+# Extra annotations for pods in deployment
+podAnnotations: {}
+
+# Extra labels for pods in deployment
+podLabels: {}
+
+# Security context for pod
+podSecurityContext: {}
+
+# Security context for container
+containerSecurityContext: {}
+
+features:
+  apiPriorityAndFairness: true # Must be removed or set to `false` for Kubernetes older than 1.20.*

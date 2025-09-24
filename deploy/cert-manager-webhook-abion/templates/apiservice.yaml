@@ -7,8 +7,14 @@ metadata:
     chart: {{ include "cert-manager-webhook-abion.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+  {{- with .Values.additionalLabels }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   annotations:
     cert-manager.io/inject-ca-from: "{{ .Release.Namespace }}/{{ include "cert-manager-webhook-abion.servingCertificate" . }}"
+  {{- with .Values.additionalAnnotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   group: {{ .Values.groupName }}
   groupPriorityMinimum: 1000
