@@ -1,6 +1,6 @@
 # ACME webhook for Abion (cert-manager-webhook-abion)
 `cert-manager-webhook-abion` is an ACME webhook for [cert-manager]. It provides an ACME webhook for [cert-manager], which 
-allows to use a `DNS-01 challange` with [Abion]. Internally the cert-manager-webhook-abion uses the 
+allows using a `DNS-01 challange` with [Abion]. Internally, the cert-manager-webhook-abion uses the 
 Abion API to communicate with [Abion API].
 
 ## Release History
@@ -145,9 +145,28 @@ As said above, the conformance test is run against the real [Abion API]. Therefo
 To run the conformance test you need to update abion-credentials.yaml and replace the `<ABION-API-KEY>` with a valid API Key, change the `example.com.` zone name with a valid one before you can run the test by executing: 
 
 ```
-TEST_ZONE_NAME=example.com. make test
+TEST_ZONE_NAME=example.com. ABION_API_HOST=https://api.abion.com ABION_API_TIMEOUT=10 make test
 ```
 
+## Release
+This project uses **Git tags** to drive both Docker image publishing and Helm chart releases.
+
+### 1.Prepare Helm Chart
+Before creating a release, update the chart metadata in
+[`deploy/cert-manager-webhook-abion/Chart.yaml`](deploy/cert-manager-webhook-abion/Chart.yaml):
+
+```yaml
+version: 1.3.0      # match the new release version (SemVer, no leading v)
+appVersion: "1.3.0" # match the new release version (SemVer, no leading v)
+```
+### 2. Create a Git tag
+Create a new Git tag for the new release:
+```bash
+git add deploy/cert-manager-webhook-abion/Chart.yaml
+git commit -m "Release v1.3.0"
+git tag v1.3.0
+git push origin main --tags
+```
 
 [ACME documentation]: https://cert-manager.io/docs/configuration/acme/
 [Certificate]: https://cert-manager.io/docs/usage/certificate/

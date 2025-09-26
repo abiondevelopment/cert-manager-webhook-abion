@@ -1,0 +1,25 @@
+# Copyright 2025 Abion AB
+# SPDX-License-Identifier: Apache-2.0
+
+version: "2"
+
+run:
+  timeout: 5m
+
+linters:
+  enable:
+    - unused
+    - govet
+    - staticcheck
+    - ineffassign
+    - errcheck
+    - revive
+    - gocritic
+    - errname
+    - forbidigo
+    - nilerr
+    - unused
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0

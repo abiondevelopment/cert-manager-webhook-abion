@@ -1,6 +1,7 @@
 # CHANGELOG
-| Date       | Version | Description                                                                 |
-|------------|---------|-----------------------------------------------------------------------------|
-| 2024-03-18 | v1.0.0  | initial release                                                             |
-| 2024-04-03 | v1.1.0  | added helm deployments and built docker image based on linux/amd64 platform |
-| 2024-05-06 | v1.2.0  | add support for updating port                                               |
+| Date       | Version | Description                                                                                                                                                                                                                                                                                 |
+|------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 2024-03-18 | v1.0.0  | initial release                                                                                                                                                                                                                                                                             |
+| 2024-04-03 | v1.1.0  | added helm deployments and built docker image based on linux/amd64 platform                                                                                                                                                                                                                 |
+| 2024-05-06 | v1.2.0  | add support for updating port                                                                                                                                                                                                                                                               |
+| 2025-09-24 | latest  | Use abion go client to communicate with Abion API <br/>Enhance helm chart with default values and extra labels/annotations <br/>Upgrade go to version 1.25<br/>Upgraded lint and code formatting. Added license headers<br/>Updated cert-manager to v1.18.2 and k8s dependencies to v0.32.0 |
