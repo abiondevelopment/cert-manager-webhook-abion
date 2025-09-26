@@ -1,0 +1,13 @@
+apiVersion: v1
+entries:
+  cert-manager-webhook-abion:
+  - apiVersion: v1
+    appVersion: "1.0"
+    created: "2025-09-26T10:10:53.579329439Z"
+    description: A Helm chart for cert-manager-webhook-abion
+    digest: 3cf542be975b34cdaf625ff4696f2fcbb34b4640f6a77e83576809ae0c3face1
+    name: cert-manager-webhook-abion
+    urls:
+    - https://github.com/abiondevelopment/cert-manager-webhook-abion/releases/download/cert-manager-webhook-abion-0.1.0/cert-manager-webhook-abion-0.1.0.tgz
+    version: 0.1.0
+generated: "2025-09-26T10:10:53.579335891Z"
