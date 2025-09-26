@@ -6,7 +6,8 @@ IMAGE_NAME := abiondevelopment/cert-manager-webhook-abion
 
 # Detect if we're on a tagged commit
 GIT_TAG := $(shell git describe --tags --exact-match 2>/dev/null)
-IMAGE_TAG ?= $(if $(GIT_TAG),$(GIT_TAG),latest)
+IMAGE_VERSION := $(shell echo $(GIT_TAG) | sed 's/^v//')
+IMAGE_TAG ?= $(if $(IMAGE_VERSION),$(IMAGE_VERSION),latest)
 
 OUT := $(shell pwd)/_out
 
@@ -49,9 +50,14 @@ _test/kubebuilder-$(KUBEBUILDER_VERSION)-$(OS)-$(ARCH)/etcd _test/kubebuilder-$(
 
 build:
 	docker build -t "$(IMAGE_NAME):$(IMAGE_TAG)" .
-
+	@if [ "$(IMAGE_TAG)" != "latest" ]; then \
+		docker tag "$(IMAGE_NAME):$(IMAGE_TAG)" "$(IMAGE_NAME):latest"; \
+	fi
 push:
 	docker push "$(IMAGE_NAME):$(IMAGE_TAG)"
+	@if [ "$(IMAGE_TAG)" != "latest" ]; then \
+		docker push "$(IMAGE_NAME):latest"
+	fi
 
 clean:
 	rm -r _test $(OUT)
