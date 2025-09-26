@@ -56,7 +56,7 @@ build:
 push:
 	docker push "$(IMAGE_NAME):$(IMAGE_TAG)"
 	@if [ "$(IMAGE_TAG)" != "latest" ]; then \
-		docker push "$(IMAGE_NAME):latest"
+		docker push "$(IMAGE_NAME):latest"; \
 	fi
 
 clean:
