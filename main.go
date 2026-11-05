@@ -53,8 +53,14 @@ func main() {
 	// You can register multiple DNS provider implementations with a single
 	// webhook, where the Name() method will be used to disambiguate between
 	// the different implementations.
+	propagation, err := newPropagationWaiterFromEnv()
+	if err != nil {
+		panic(err.Error())
+	}
+	klog.Infof("propagation wait: %s", propagation)
+
 	cmd.RunWebhookServer(GroupName,
-		&abionDNSProviderSolver{},
+		&abionDNSProviderSolver{propagation: propagation},
 	)
 }
 
@@ -63,7 +69,8 @@ func main() {
 // To do so, it must implement the `github.com/cert-manager/cert-manager/pkg/acme/webhook.Solver`
 // interface.
 type abionDNSProviderSolver struct {
-	client *kubernetes.Clientset
+	client      *kubernetes.Clientset
+	propagation *propagationWaiter // nil disables the post-Present wait
 }
 
 // abionDNSProviderConfig is a structure that is used to decode into when
@@ -167,6 +174,13 @@ func (c *abionDNSProviderSolver) Present(ch *v1alpha1.ChallengeRequest) error {
 	_, err = abionClient.PatchZone(context.Background(), domain, patchRequest)
 	if err != nil {
 		return fmt.Errorf("error updating zone %w", err)
+	}
+
+	// Do not return before the TXT is visible on the zone's authoritative
+	// nameservers with cert-manager's own query shape, so that its first
+	// self-check cannot cache a negative answer (see propagation.go).
+	if err := c.propagation.wait(context.Background(), ch.ResolvedZone, ch.ResolvedFQDN, ch.Key); err != nil {
+		return fmt.Errorf("waiting for TXT propagation: %w", err)
 	}
 
 	return nil

@@ -5,6 +5,26 @@
 allows using a `DNS-01 challange` with [Abion]. Internally, the cert-manager-webhook-abion uses the 
 Abion API to communicate with [Abion API].
 
+## Propagation wait
+
+After writing the `_acme-challenge` TXT record, `Present` polls the zone's
+authoritative nameservers (from its NS records) every 2 s with the same query
+shape cert-manager uses for its self-check (UDP, EDNS0 4096, no options,
+RD=1) and only returns once every server answers with the record. This keeps
+cert-manager's first self-check from caching a negative answer for the zone's
+negative TTL when the nameservers answer from a cache that is filled before
+the record is published. On timeout (default 120 s) `Present` returns an error
+and cert-manager retries it.
+
+| Environment | Chart value | Default | Meaning |
+|---|---|---|---|
+| `PROPAGATION_NAMESERVERS` | `propagation.nameservers` | empty (zone NS records) | comma-separated `host[:port]` list; `none` disables the wait |
+| `PROPAGATION_TIMEOUT` | `propagation.timeout` | `120s` | Go duration or seconds |
+
+Plain `go test ./...` runs the unit tests; the cert-manager conformance suite
+needs envtest binaries and a live zone and runs with `make test`
+(`-tags conformance`).
+
 ## Release History
 Refer to the [CHANGELOG](CHANGELOG.md) file.
 
