@@ -1,6 +1,12 @@
 // Copyright 2025 Abion AB
 // SPDX-License-Identifier: Apache-2.0
 
+// The cert-manager conformance suite imports a package that panics at init
+// without envtest binaries (TEST_ASSET_*), so it only compiles with
+// `-tags conformance` (see `make test`). Plain `go test ./...` runs the unit
+// tests only.
+//go:build conformance
+
 package main
 
 import (

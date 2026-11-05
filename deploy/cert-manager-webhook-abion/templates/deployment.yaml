@@ -60,6 +60,16 @@ spec:
             - name: ABION_API_TIMEOUT
               value: {{ .Values.abionApiTimeout | quote }}
           {{- end }}
+          {{- with .Values.propagation }}
+          {{- if .nameservers }}
+            - name: PROPAGATION_NAMESERVERS
+              value: {{ .nameservers | quote }}
+          {{- end }}
+          {{- if .timeout }}
+            - name: PROPAGATION_TIMEOUT
+              value: {{ .timeout | quote }}
+          {{- end }}
+          {{- end }}
           ports:
             - name: https
               containerPort: {{ .Values.port }}

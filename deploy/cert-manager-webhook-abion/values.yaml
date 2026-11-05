@@ -72,3 +72,15 @@ containerSecurityContext: {}
 
 features:
   apiPriorityAndFairness: true # Must be removed or set to `false` for Kubernetes older than 1.20.*
+
+# After presenting a TXT record, Present polls the zone's authoritative
+# nameservers with cert-manager's own query shape and only returns once every
+# server answers with the record, so cert-manager's first self-check cannot
+# cache a negative answer. See propagation.go.
+propagation:
+  # Comma-separated host[:port] list to poll. Empty: the zone's NS records are
+  # resolved at runtime. "none": disable the wait.
+  nameservers: ""
+  # Give up after this long (Go duration or seconds); Present then returns an
+  # error and cert-manager retries it.
+  timeout: 120s
