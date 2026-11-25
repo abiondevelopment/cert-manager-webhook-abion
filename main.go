@@ -31,10 +31,7 @@ var AbionAPIHost = os.Getenv("ABION_API_HOST")
 var AbionAPITimeoutEnv = os.Getenv("ABION_API_TIMEOUT")
 var AbionAPITimeout int
 
-func main() {
-	if GroupName == "" {
-		panic("GROUP_NAME must be specified")
-	}
+func init() {
 	if AbionAPIHost == "" {
 		AbionAPIHost = "https://api.abion.com"
 	}
@@ -46,6 +43,12 @@ func main() {
 		if err != nil {
 			panic("ABION_API_TIMEOUT not a number")
 		}
+	}
+}
+
+func main() {
+	if GroupName == "" {
+		panic("GROUP_NAME must be specified")
 	}
 
 	// This will register our Abion DNS provider with the webhook serving
@@ -63,7 +66,7 @@ func main() {
 // To do so, it must implement the `github.com/cert-manager/cert-manager/pkg/acme/webhook.Solver`
 // interface.
 type abionDNSProviderSolver struct {
-	client *kubernetes.Clientset
+	client kubernetes.Interface
 }
 
 // abionDNSProviderConfig is a structure that is used to decode into when
