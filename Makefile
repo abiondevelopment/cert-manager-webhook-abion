@@ -15,7 +15,7 @@ KUBEBUILDER_VERSION=1.28.0
 
 HELM_FILES := $(shell find deploy/cert-manager-webhook-abion)
 
-.PHONY: fmt lint license tools build push clean rendered-manifest.yaml
+.PHONY: fmt lint license tools test test-conformance build push clean rendered-manifest.yaml
 
 fmt:
 	go fmt ./...
@@ -34,11 +34,14 @@ tools:
 
 ## Test
 
-test: _test/kubebuilder-$(KUBEBUILDER_VERSION)-$(OS)-$(ARCH)/etcd _test/kubebuilder-$(KUBEBUILDER_VERSION)-$(OS)-$(ARCH)/kube-apiserver _test/kubebuilder-$(KUBEBUILDER_VERSION)-$(OS)-$(ARCH)/kubectl
+test:
+	$(GO) test -v -race ./...
+
+test-conformance: _test/kubebuilder-$(KUBEBUILDER_VERSION)-$(OS)-$(ARCH)/etcd _test/kubebuilder-$(KUBEBUILDER_VERSION)-$(OS)-$(ARCH)/kube-apiserver _test/kubebuilder-$(KUBEBUILDER_VERSION)-$(OS)-$(ARCH)/kubectl
 	TEST_ASSET_ETCD=_test/kubebuilder-$(KUBEBUILDER_VERSION)-$(OS)-$(ARCH)/etcd \
 	TEST_ASSET_KUBE_APISERVER=_test/kubebuilder-$(KUBEBUILDER_VERSION)-$(OS)-$(ARCH)/kube-apiserver \
 	TEST_ASSET_KUBECTL=_test/kubebuilder-$(KUBEBUILDER_VERSION)-$(OS)-$(ARCH)/kubectl \
-	$(GO) test -v -timeout=20m .
+	$(GO) test -v -tags conformance -timeout=20m .
 
 _test/kubebuilder-$(KUBEBUILDER_VERSION)-$(OS)-$(ARCH).tar.gz: | _test
 	curl -fsSL https://go.kubebuilder.io/test-tools/$(KUBEBUILDER_VERSION)/$(OS)/$(ARCH) -o $@

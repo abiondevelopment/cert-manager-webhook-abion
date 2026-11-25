@@ -5,6 +5,47 @@
 allows using a `DNS-01 challange` with [Abion]. Internally, the cert-manager-webhook-abion uses the 
 Abion API to communicate with [Abion API].
 
+## How it works
+
+```mermaid
+flowchart LR
+    subgraph k8s[Kubernetes cluster]
+        cert[Certificate]
+        issuer[ClusterIssuer / Issuer<br/>solver: webhook abion]
+        cm[cert-manager]
+        apiserver[Kubernetes API server]
+        webhook[cert-manager-webhook-abion]
+        secret[(Secret<br/>abion-credentials)]
+        tls[(Secret<br/>TLS certificate)]
+    end
+
+    acme[ACME server<br/>e.g. Let's Encrypt]
+    abion[Abion API]
+    dns[Abion DNS<br/>name servers]
+
+    cert --> cm
+    issuer --> cm
+    cm -- "1. Order certificate" --> acme
+    acme -- "2. DNS-01 challenge" --> cm
+    cm -- "3. ChallengeRequest<br/>(Present / CleanUp)" --> apiserver
+    apiserver -- "APIService" --> webhook
+    webhook -- "4. Read API key" --> secret
+    webhook -- "5. Create / delete<br/>_acme-challenge TXT record" --> abion
+    abion --> dns
+    cm -. "6. Self-check TXT record" .-> dns
+    acme -. "7. Validate TXT record" .-> dns
+    cm -- "8. Store signed certificate" --> tls
+```
+
+1. A `Certificate` resource referencing an `Issuer`/`ClusterIssuer` configured with the `abion` webhook solver triggers cert-manager to order a certificate from the ACME server.
+2. The ACME server responds with a `DNS-01` challenge.
+3. cert-manager sends a `ChallengeRequest` to the webhook, which is registered in the Kubernetes API server as an `APIService`.
+4. The webhook reads the Abion API key from the `Secret` referenced in the issuer config.
+5. The webhook calls the Abion API to create the `_acme-challenge` `TXT` record in the zone (and removes it again on `CleanUp`).
+6. cert-manager verifies that the record has propagated using its recursive name servers.
+7. The ACME server validates the `TXT` record.
+8. cert-manager stores the issued certificate in a TLS `Secret`.
+
 ## Release History
 Refer to the [CHANGELOG](CHANGELOG.md) file.
 
@@ -23,6 +64,13 @@ This webhook has been tested with [cert-manager] v1.14.4 and [minikube] v1.32.0 
 should work on other hardware platforms as well but no steps have been taken to verify this.
 
 ## Test
+
+### Unit tests
+Unit tests run against a fake Abion API and a fake Kubernetes client, no setup needed. They run on every pull request.
+
+```
+make test
+```
 
 ### Testing with Minikube
 1. Build this webhook in Minikube:
@@ -147,7 +195,7 @@ As said above, the conformance test is run against the real [Abion API]. Therefo
 To run the conformance test you need to update abion-credentials.yaml and replace the `<ABION-API-KEY>` with a valid API Key, change the `example.com.` zone name with a valid one before you can run the test by executing: 
 
 ```
-TEST_ZONE_NAME=example.com. ABION_API_HOST=https://api.abion.com ABION_API_TIMEOUT=10 make test
+TEST_ZONE_NAME=example.com. ABION_API_HOST=https://api.abion.com ABION_API_TIMEOUT=10 make test-conformance
 ```
 
 ## Release
