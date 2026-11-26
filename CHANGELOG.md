@@ -1,4 +1,6 @@
 # CHANGELOG
+Release notes for versions after v1.3.2 are published on the [GitHub releases page](https://github.com/abiondevelopment/cert-manager-webhook-abion/releases).
+
 | Date       | Version | Description                                                                                                                                                                                                                                                                                 |
 |------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | 2024-03-18 | v1.0.0  | initial release                                                                                                                                                                                                                                                                             |

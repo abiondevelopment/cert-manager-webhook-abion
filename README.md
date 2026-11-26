@@ -60,7 +60,7 @@ make build
 Prebuilt docker images can be found on [Docker Hub]
 
 ## Compatibility
-This webhook has been tested with [cert-manager] v1.14.4 and [minikube] v1.32.0 on Darwin 13.3 (arm64). In theory, it 
+This webhook has been tested with [cert-manager] v1.21.3 and [minikube] v1.38.1 (Kubernetes v1.36.2) on macOS 26.5 (arm64). In theory, it 
 should work on other hardware platforms as well but no steps have been taken to verify this.
 
 ## Test
@@ -89,8 +89,8 @@ make test
    helm install cert-manager jetstack/cert-manager \
        --namespace cert-manager \
        --create-namespace \
-       --set installCRDs=true \
-       --version v1.14.4 \
+       --set crds.enabled=true \
+       --version v1.21.3 \
        --set 'extraArgs={--dns01-recursive-nameservers=8.8.8.8:53\,1.1.1.1:53}'
 
    kubectl get pods --namespace cert-manager --watch

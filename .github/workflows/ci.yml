@@ -28,9 +28,9 @@ jobs:
           go-version-file: go.mod
 
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v8
+        uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
         with:
-          version: v2.5.0
+          version: v2.15.0
 
       - name: Check license headers
         run: go run github.com/google/addlicense@v1.1.1 -check -s=only -c "Abion AB" -l apache -ignore "deploy/**/artifacthub-repo.yml" .

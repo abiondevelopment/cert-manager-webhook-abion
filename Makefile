@@ -11,7 +11,8 @@ IMAGE_TAG ?= $(if $(IMAGE_VERSION),$(IMAGE_VERSION),latest)
 
 OUT := $(shell pwd)/_out
 
-KUBEBUILDER_VERSION=1.28.0
+ENVTEST_VERSION=1.36.2
+ENVTEST_DIR := _test/envtest-$(ENVTEST_VERSION)-$(OS)-$(ARCH)
 
 HELM_FILES := $(shell find deploy/cert-manager-webhook-abion)
 
@@ -29,7 +30,7 @@ license:
 ## Tools
 tools:
 	go install github.com/google/addlicense@latest
-	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.5.0
+	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.15.0
 
 
 ## Test
@@ -37,17 +38,17 @@ tools:
 test:
 	$(GO) test -v -race ./...
 
-test-conformance: _test/kubebuilder-$(KUBEBUILDER_VERSION)-$(OS)-$(ARCH)/etcd _test/kubebuilder-$(KUBEBUILDER_VERSION)-$(OS)-$(ARCH)/kube-apiserver _test/kubebuilder-$(KUBEBUILDER_VERSION)-$(OS)-$(ARCH)/kubectl
-	TEST_ASSET_ETCD=_test/kubebuilder-$(KUBEBUILDER_VERSION)-$(OS)-$(ARCH)/etcd \
-	TEST_ASSET_KUBE_APISERVER=_test/kubebuilder-$(KUBEBUILDER_VERSION)-$(OS)-$(ARCH)/kube-apiserver \
-	TEST_ASSET_KUBECTL=_test/kubebuilder-$(KUBEBUILDER_VERSION)-$(OS)-$(ARCH)/kubectl \
+test-conformance: $(ENVTEST_DIR)/etcd $(ENVTEST_DIR)/kube-apiserver $(ENVTEST_DIR)/kubectl
+	TEST_ASSET_ETCD=$(ENVTEST_DIR)/etcd \
+	TEST_ASSET_KUBE_APISERVER=$(ENVTEST_DIR)/kube-apiserver \
+	TEST_ASSET_KUBECTL=$(ENVTEST_DIR)/kubectl \
 	$(GO) test -v -tags conformance -timeout=20m .
 
-_test/kubebuilder-$(KUBEBUILDER_VERSION)-$(OS)-$(ARCH).tar.gz: | _test
-	curl -fsSL https://go.kubebuilder.io/test-tools/$(KUBEBUILDER_VERSION)/$(OS)/$(ARCH) -o $@
+$(ENVTEST_DIR).tar.gz: | _test
+	curl -fsSL https://github.com/kubernetes-sigs/controller-tools/releases/download/envtest-v$(ENVTEST_VERSION)/envtest-v$(ENVTEST_VERSION)-$(OS)-$(ARCH).tar.gz -o $@
 
-_test/kubebuilder-$(KUBEBUILDER_VERSION)-$(OS)-$(ARCH)/etcd _test/kubebuilder-$(KUBEBUILDER_VERSION)-$(OS)-$(ARCH)/kube-apiserver _test/kubebuilder-$(KUBEBUILDER_VERSION)-$(OS)-$(ARCH)/kubectl: _test/kubebuilder-$(KUBEBUILDER_VERSION)-$(OS)-$(ARCH).tar.gz | _test/kubebuilder-$(KUBEBUILDER_VERSION)-$(OS)-$(ARCH)
-	tar xfO $< kubebuilder/bin/$(notdir $@) > $@ && chmod +x $@
+$(ENVTEST_DIR)/etcd $(ENVTEST_DIR)/kube-apiserver $(ENVTEST_DIR)/kubectl: $(ENVTEST_DIR).tar.gz | $(ENVTEST_DIR)
+	tar xfO $< controller-tools/envtest/$(notdir $@) > $@ && chmod +x $@
 
 ## Docker
 
@@ -74,5 +75,5 @@ $(OUT)/rendered-manifest.yaml: $(HELM_FILES) | $(OUT)
             --set image.tag=$(IMAGE_TAG) \
             deploy/cert-manager-webhook-abion > $@
 
-_test $(OUT) _test/kubebuilder-$(KUBEBUILDER_VERSION)-$(OS)-$(ARCH):
+_test $(OUT) $(ENVTEST_DIR):
 	mkdir -p $@
