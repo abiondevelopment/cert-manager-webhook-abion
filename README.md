@@ -1,4 +1,4 @@
-[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cert-manager-webhook-abion)](https://artifacthub.io/packages/search?repo=cert-manager-webhook-abion)
+[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/cert-manager-webhook-abion)](https://artifacthub.io/packages/helm/cert-manager-webhook-abion/cert-manager-webhook-abion)
 
 # ACME webhook for Abion (cert-manager-webhook-abion)
 `cert-manager-webhook-abion` is an ACME webhook for [cert-manager]. It provides an ACME webhook for [cert-manager], which 
@@ -199,31 +199,28 @@ TEST_ZONE_NAME=example.com. ABION_API_HOST=https://api.abion.com ABION_API_TIMEO
 ```
 
 ## Release
-This project uses **Git tags** to drive both Docker image publishing and Helm chart releases.
+Releases are created from the [GitHub releases page]:
 
-### 1.Prepare Helm Chart
-Before creating a release, update the chart metadata in
-[`deploy/cert-manager-webhook-abion/Chart.yaml`](deploy/cert-manager-webhook-abion/Chart.yaml):
+1. Click **Draft a new release**.
+2. Under **Choose a tag**, type the new version (e.g. `v1.4.0`) and select **Create new tag on publish**, with `main` as target. The tag must have the format `vX.Y.Z`.
+3. Click **Generate release notes**. Pull requests are grouped by label as configured in [`.github/release.yml`](.github/release.yml).
+4. Make sure **Set as the latest release** is checked and click **Publish release**.
 
-```yaml
-version: 1.3.0      # match the new release version (SemVer, no leading v)
-appVersion: "1.3.0" # match the new release version (SemVer, no leading v)
-```
-### 2. Create a Git tag
-Create a new Git tag for the new release:
-```bash
-git add deploy/cert-manager-webhook-abion/Chart.yaml
-git commit -m "Release v1.3.0"
-git tag v1.3.0
-git push origin main --tags
-```
+Publishing the release creates the tag, which triggers the release workflows:
+- the Docker image is pushed to [Docker Hub] with the version and `latest` tags
+- the Helm chart package is attached to the release and published to the Helm repository, which shows up on [Artifact Hub]
+
+The Docker image and the Helm chart (`version` and `appVersion` in
+[`Chart.yaml`](deploy/cert-manager-webhook-abion/Chart.yaml)) get their version from the tag, without the leading `v`.
 
 [ACME documentation]: https://cert-manager.io/docs/configuration/acme/
+[Artifact Hub]: https://artifacthub.io/packages/helm/cert-manager-webhook-abion/cert-manager-webhook-abion
 [Certificate]: https://cert-manager.io/docs/usage/certificate/
 [cert-manager]: https://cert-manager.io/
 [Abion]: https://abion.com/
 [Abion API]: https://demo.abion.com/pmapi-doc/
 [Docker Hub]: https://hub.docker.com/r/abiondevelopment/cert-manager-webhook-abion
+[GitHub releases page]: https://github.com/abiondevelopment/cert-manager-webhook-abion/releases
 [Helm]: https://helm.sh
 [image tags]: https://hub.docker.com/r/abiondevelopment/cert-manager-webhook-abion
 [minikube]: https://minikube.sigs.k8s.io/

@@ -6,7 +6,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'   # trigger on any tag starting with v
+      - 'v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
   ci:

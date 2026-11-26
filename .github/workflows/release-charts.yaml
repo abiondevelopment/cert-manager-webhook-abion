@@ -6,7 +6,7 @@ name: Release Charts
 on:
   push:
     tags:
-      - 'v*'   # trigger on any tag starting with v
+      - 'v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
   ci:
@@ -28,16 +28,25 @@ jobs:
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
 
-      - name: Install Helm
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-        uses: azure/setup-helm@v4
+      - name: Set chart version from tag
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          sed -i "s/^version:.*/version: ${version}/; s/^appVersion:.*/appVersion: \"${version}\"/" deploy/cert-manager-webhook-abion/Chart.yaml
 
-      - name: Run chart-releaser
+      - name: Install chart-releaser
         uses: helm/chart-releaser-action@v1.7.0
         with:
-          charts_dir: deploy
-          config: .github/cr.yaml
-          mark_as_latest: true
+          install_only: true
+
+      - name: Package chart
+        run: cr package deploy/cert-manager-webhook-abion
+
+      - name: Upload chart to the release
+        run: gh release upload "$GITHUB_REF_NAME" .cr-release-packages/*.tgz
+        env:
+          GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Update Helm repository index
+        run: cr index -o "${{ github.repository_owner }}" -r "${{ github.event.repository.name }}" --release-name-template "v{{ .Version }}" --push
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
