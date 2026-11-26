@@ -1,0 +1,17 @@
+# Copyright 2025 Abion AB
+# SPDX-License-Identifier: Apache-2.0
+
+changelog:
+  categories:
+    - title: Features
+      labels:
+        - enhancement
+    - title: Bug fixes
+      labels:
+        - bug
+    - title: Dependencies
+      labels:
+        - dependencies
+    - title: Other changes
+      labels:
+        - "*"

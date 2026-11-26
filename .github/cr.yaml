@@ -1,0 +1,4 @@
+# Copyright 2025 Abion AB
+# SPDX-License-Identifier: Apache-2.0
+
+generate-release-notes: true
