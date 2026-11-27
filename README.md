@@ -206,7 +206,7 @@ Releases are created from the [GitHub releases page]:
 3. Click **Generate release notes**. Pull requests are grouped by label as configured in [`.github/release.yml`](.github/release.yml).
 4. Make sure **Set as the latest release** is checked and click **Publish release**.
 
-Publishing the release creates the tag, which triggers the release workflows:
+Publishing the release triggers the release workflows (pushing a tag alone does not):
 - the Docker image is pushed to [Docker Hub] with the version and `latest` tags
 - the Helm chart package is attached to the release and published to the Helm repository, which shows up on [Artifact Hub]
 
