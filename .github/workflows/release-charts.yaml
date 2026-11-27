@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -44,7 +44,7 @@ jobs:
           sed -i "s/^version:.*/version: ${version}/; s/^appVersion:.*/appVersion: \"${version}\"/" deploy/cert-manager-webhook-abion/Chart.yaml
 
       - name: Install chart-releaser
-        uses: helm/chart-releaser-action@v1.7.0
+        uses: helm/chart-releaser-action@v1.9.0
         with:
           install_only: true
 
